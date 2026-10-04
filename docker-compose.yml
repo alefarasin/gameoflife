@@ -1,0 +1,23 @@
+services:
+  backend:
+    build: { context: ., dockerfile: backend/Dockerfile }
+    volumes: [gol-data:/data]
+    restart: unless-stopped
+
+  worker:
+    build: { context: ., dockerfile: worker/Dockerfile }
+    environment:
+      GOL_BACKEND_URL: http://backend:8000
+      # GOL_RUN_ID: demo
+      # GOL_CONFIG: '{"learning": "sarsa", "seed": 3}'
+    depends_on: [backend]
+    restart: unless-stopped
+
+  web:
+    build: { context: ., dockerfile: web/Dockerfile }
+    ports: ["8080:80"]
+    depends_on: [backend]
+    restart: unless-stopped
+
+volumes:
+  gol-data:
