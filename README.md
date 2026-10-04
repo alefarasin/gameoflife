@@ -4,9 +4,8 @@ Simulatore di una popolazione di creature su una griglia con cibo, ostacoli e (o
 un terreno alla Conway. Ogni creatura ha un piccolo cervello (MLP) che evolve per mutazione
 e, a scelta, impara durante la vita con apprendimento per rinforzo.
 
-> **Stato attuale:** il repository contiene solo i moduli di base (configurazione e cervelli).
-> Non esistono ancora il simulatore del mondo, il backend né l'interfaccia web: qui sotto
-> è descritto ciò che si può usare oggi.
+> **Stato attuale:** moduli di base (configurazione e cervelli) più backend, worker con metriche
+> fittizie e dashboard web containerizzati. Il simulatore reale del mondo non esiste ancora.
 
 ## Struttura
 
@@ -80,6 +79,21 @@ x = rng.random((100, N_INPUTS)).astype(np.float32)
 _, q = brains.forward(idx, x)                 # valori Q per le 5 azioni
 brains.copy_mutated(np.arange(100, 110), np.arange(10), rate=0.1, std=0.15, rng=rng)  # riproduzione
 ```
+
+## Docker e dashboard avanzamenti
+
+```bash
+docker compose up --build   # poi apri http://localhost:8080
+```
+
+| Servizio | Ruolo |
+|---|---|
+| `backend` | server HTTP stdlib + SQLite (volume `gol-data`): riceve le metriche (`POST /api/metrics`), le serve (`GET /api/runs`, `/api/runs/{id}/metrics`) e le streamma via SSE (`/api/runs/{id}/stream`) |
+| `worker` | `python -m gol_worker.run`: per ora usa `FakeSim` (metriche fittizie); il simulatore reale andrà a sostituirlo. Variabili: `GOL_RUN_ID`, `GOL_CONFIG` (JSON di `SimConfig`), `GOL_REPORT_SECONDS`. PyTorch opzionale: `--build-arg WITH_TORCH=1` |
+| `web` | React + Vite servita da nginx (proxy `/api` → backend): popolazione, fitness, energia in tempo reale |
+
+Sviluppo locale: `PYTHONPATH=shared:backend python -m gol_backend.main` e `npm install && npm run dev` in `web/`.
+Test backend: `pip install pytest pydantic && PYTHONPATH=shared:backend pytest backend/tests`.
 
 ## Licenza
 
