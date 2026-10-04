@@ -88,12 +88,12 @@ docker compose up --build   # poi apri http://localhost:8080
 
 | Servizio | Ruolo |
 |---|---|
-| `backend` | FastAPI + SQLite (volume `gol-data`): riceve le metriche (`POST /api/metrics`), le serve (`GET /api/runs`, `/api/runs/{id}/metrics`) e le streamma via SSE (`/api/runs/{id}/stream`) |
+| `backend` | server HTTP stdlib + SQLite (volume `gol-data`): riceve le metriche (`POST /api/metrics`), le serve (`GET /api/runs`, `/api/runs/{id}/metrics`) e le streamma via SSE (`/api/runs/{id}/stream`) |
 | `worker` | `python -m gol_worker.run`: per ora usa `FakeSim` (metriche fittizie); il simulatore reale andrà a sostituirlo. Variabili: `GOL_RUN_ID`, `GOL_CONFIG` (JSON di `SimConfig`), `GOL_REPORT_SECONDS`. PyTorch opzionale: `--build-arg WITH_TORCH=1` |
 | `web` | React + Vite servita da nginx (proxy `/api` → backend): popolazione, fitness, energia in tempo reale |
 
-Sviluppo locale: `PYTHONPATH=shared:backend uvicorn --factory gol_backend.main:app_factory` e `npm install && npm run dev` in `web/`.
-Test backend: `pip install pytest httpx fastapi && PYTHONPATH=shared:backend pytest backend/tests`.
+Sviluppo locale: `PYTHONPATH=shared:backend python -m gol_backend.main` e `npm install && npm run dev` in `web/`.
+Test backend: `pip install pytest pydantic && PYTHONPATH=shared:backend pytest backend/tests`.
 
 ## Licenza
 

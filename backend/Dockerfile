@@ -8,4 +8,4 @@ COPY backend/gol_backend gol_backend
 ENV PYTHONPATH=/app GOL_DB=/data/gol.db
 VOLUME /data
 EXPOSE 8000
-CMD ["uvicorn", "gol_backend.main:app_factory", "--factory", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "gol_backend.main"]
